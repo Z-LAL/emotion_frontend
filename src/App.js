@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import './App.css';
+import config from './config';
 
 function App() {
   const [gameState, setGameState] = useState('email');
@@ -12,7 +13,7 @@ function App() {
 
   // Fetch words from backend
   useEffect(() => {
-    fetch('http://localhost:5000/api/words')
+    fetch(`${config.apiUrl}/api/words`)
       .then(res => res.json())
       .then(data => setWords(data))
       .catch(err => console.error('Error fetching words:', err));
@@ -86,7 +87,7 @@ function App() {
         setCurrentWord(words.testWords[nextIndex]);
       } else {
         // Save results first, then update game state
-        fetch('http://localhost:5000/api/results', {
+        fetch(`${config.apiUrl}/api/results`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
