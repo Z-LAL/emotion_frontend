@@ -90,6 +90,7 @@ function App() {
         fetch(`${config.apiUrl}/api/results`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             email,
             results
