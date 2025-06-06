@@ -10,13 +10,21 @@ function App() {
   const [startTime, setStartTime] = useState(null);
   const [results, setResults] = useState([]);
   const [isTrialMode, setIsTrialMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch words from backend
   useEffect(() => {
+    setIsLoading(true);
     fetch(`${config.apiUrl}/api/words`)
       .then(res => res.json())
-      .then(data => setWords(data))
-      .catch(err => console.error('Error fetching words:', err));
+      .then(data => {
+        setWords(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching words:', err);
+        setIsLoading(false);
+      });
   }, []);
 
   // Handle keyboard events
@@ -132,6 +140,15 @@ function App() {
   };
 
   const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="loading">
+          <div className="loading-spinner"></div>
+          <p>Kelimeler yükleniyor... <br/>Eğer 1 dakika içinde yüklenmezse sayfayı yenileyiniz.</p>
+        </div>
+      );
+    }
+    
     switch (gameState) {
       case 'email':
         return (
