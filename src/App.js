@@ -164,7 +164,7 @@ function App() {
       return (
         <div className="loading">
           <div className="loading-spinner"></div>
-          <p>Kelimeler yükleniyor... {retryCount > 0 && `(Deneme ${retryCount}/3)`}</p>
+          <p>Kelimeler yükleniyor... <br/> Bir dakika kadar sürebilir.{retryCount > 0 && `(Deneme ${retryCount}/3)`}</p>
           {error && <p className="error-text">Bağlantı hatası. Yeniden deneniyor...</p>}
         </div>
       );
@@ -193,15 +193,15 @@ function App() {
         return (
           <div className="email-form">
             <form onSubmit={handleEmailSubmit}>
-              <h2>Please enter your email address</h2>
+              <h2>Mail Adresinizi Giriniz:</h2>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder="Mail Adresinizi Giriniz"
                 required
               />
-              <button type="submit">Start Test</button>
+              <button type="submit">Teste başla</button>
             </form>
           </div>
         );
