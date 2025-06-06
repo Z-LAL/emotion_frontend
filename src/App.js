@@ -11,21 +11,41 @@ function App() {
   const [results, setResults] = useState([]);
   const [isTrialMode, setIsTrialMode] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const [error, setError] = useState(null);
 
-  // Fetch words from backend
+  // Fetch words from backend with retry logic
   useEffect(() => {
-    setIsLoading(true);
-    fetch(`${config.apiUrl}/api/words`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchWords = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const response = await fetch(`${config.apiUrl}/api/words`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch words');
+        }
+        const data = await response.json();
         setWords(data);
         setIsLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('Error fetching words:', err);
-        setIsLoading(false);
-      });
-  }, []);
+        setError(err);
+        
+        // Retry up to 3 times with increasing delays
+        if (retryCount < 3) {
+          const delay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+          }, delay);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchWords();
+  }, [retryCount]); // Add retryCount as dependency
 
   // Handle keyboard events
   useEffect(() => {
@@ -144,7 +164,26 @@ function App() {
       return (
         <div className="loading">
           <div className="loading-spinner"></div>
-          <p>Kelimeler yükleniyor... <br/>Eğer 1 dakika içinde yüklenmezse sayfayı yenileyiniz.</p>
+          <p>Kelimeler yükleniyor... {retryCount > 0 && `(Deneme ${retryCount}/3)`}</p>
+          {error && <p className="error-text">Bağlantı hatası. Yeniden deneniyor...</p>}
+        </div>
+      );
+    }
+
+    if (error && retryCount >= 3) {
+      return (
+        <div className="error-container">
+          <h2>Bağlantı Hatası</h2>
+          <p>Kelimeler yüklenirken bir hata oluştu. 1 dakika bekleyip sayfayı yenileyiniz.</p>
+          <button 
+            onClick={() => {
+              setRetryCount(0);
+              setError(null);
+            }}
+            className="retry-button"
+          >
+            Yeniden Dene
+          </button>
         </div>
       );
     }
